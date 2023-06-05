@@ -4,7 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "server": "nodemon index.js",
+    "test": "cross-env NODE_ENV=testing jest --verbose --runInBand --silent",
+    "seed": "knex seed:run",
+    "migrate": "knex migrate:latest",
+    "rollback": "knex migrate:rollback",
+    "resetdb": "npm run rollback && npm run migrate && npm run seed"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +23,7 @@
     "helmet": "^7.0.0",
     "jsonwebtoken": "^9.0.0",
     "knex": "^2.4.2",
+    "morgan": "^1.10.0",
     "sqlite3": "^5.1.6"
   }
 }
