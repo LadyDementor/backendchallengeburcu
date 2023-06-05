@@ -1,30 +1,9 @@
 const db = require("../../data/dbConfig");
 
 const getAll = () => {
-  return knex("posts")
-    .select(
-      "posts.post_id",
-
-      "posts.post_creat_at",
-
-      "posts.post_body",
-
-      "posts.post_image_url",
-
-      "users.user_name",
-
-      "users.user_password",
-
-      "users.user_avatar_url",
-
-      "users.user_email",
-
-    )
-    .join("users","posts.user_id","users.user_id");
-
-
-}
-
+  return db("posts")
+   
+};
 
 const getById = async (id) => {
   return db("posts").where("id", post_id).first();

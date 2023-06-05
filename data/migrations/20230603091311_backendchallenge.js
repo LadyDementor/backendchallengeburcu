@@ -8,7 +8,7 @@ exports.up = function (knex) {
       table.increments("user_id");
       table.string("username").notNullable().unique();
       table.string("password").notNullable();
-      table.string("avatar_url").notNullable();
+      table.string("avatar_url");
       table.string("email").notNullable().unique();
     })
 
@@ -26,9 +26,43 @@ exports.up = function (knex) {
         .onDelete("RESTRICT")
         .onUpdate("RESTRICT"); //RESTRICT yasaklar silinmesini
     })
-    .createTable("likes", (t) => {
-      t.increments("like_id");
-      t.timestamp("like_at").defaultTo(knex.fn.now());
+
+    .createTable("roles", (table) => {
+      table.increments("role_id");
+      table.string("rolename").notNullable().defaultTo("user");
+      table
+        .integer("user_id")
+        .notNullable()
+        .references("user_id") //ilişki kurulacak kolon adı
+        .inTable("users") //ilişki kurulacak tablo adı.
+        .onDelete("RESTRICT")
+        .onUpdate("RESTRICT"); //RESTRICT yasaklar silinmesini
+    })
+    .createTable("comments", (table) => {
+      table.increments("comment_id");
+
+      table.timestamp("create_at").defaultTo(knex.fn.now());
+      table.string("body").notNullable();
+      table.string("image_url");
+      table
+        .integer("post_id")
+        .notNullable()
+        .references("post_id")
+        .inTable("posts")
+        .onDelete("RESTRICT")
+        .onUpdate("RESTRICT");
+      table
+        .integer("user_id")
+        .notNullable()
+        .references("user_id") //ilişki kurulacak kolon adı
+        .inTable("users") //ilişki kurulacak tablo adı.
+        .onDelete("RESTRICT")
+        .onUpdate("RESTRICT"); //RESTRICT yasaklar silinmesini
+    })
+
+    .createTable("favorites", (t) => {
+      t.increments("favorite_id");
+      t.timestamp("favorite_at").defaultTo(knex.fn.now());
       t.integer("user_id")
         .notNullable()
         .references("user_id") //ilişki kurulacak kolon adı
@@ -50,7 +84,9 @@ exports.up = function (knex) {
  */
 exports.down = function (knex) {
   return knex.schema
-    .dropTableIfExists("likes")
+    .dropTableIfExists("favorites")
+    .dropTableIfExists("comments")
+    .dropTableIfExists("roles")
     .dropTableIfExists("posts")
     .dropTableIfExists("users");
 };
