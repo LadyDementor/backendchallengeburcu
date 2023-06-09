@@ -1,6 +1,8 @@
 const validator = require("validator");
 const userModel = require("../users/user-model");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../secret/index");
 
 async function checkPayload(req, res, next) {
   try {
@@ -18,6 +20,60 @@ async function checkPayload(req, res, next) {
         .json({ message: "Password must be at least 5 characters." });
     } else if (!emailCheck) {
       res.status(400).json({ message: "Email address is not valid." });
+    } else {
+      next();
+    }
+  } catch (error) {
+    next(error);
+  }
+}
+async function isUserExist(req, res, next) {
+  try {
+    const { usernameOrEmail } = req.body;
+    let existingUser;
+    if (validator.isEmail(usernameOrEmail)) {
+      existingUser = await userModel.getBy({ email: usernameOrEmail });
+    } else {
+      existingUser = await userModel.getBy({ username: usernameOrEmail });
+    }
+    if (existingUser) {
+      req.currentUser = existingUser;
+      next();
+    } else {
+      res.status(401).json({ message: "Invalid user or password" });
+    }
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function checkPassword(req, res, next) {
+  const { password } = req.body;
+  const dbPassword = req.currentUser.password;
+  const isPasswordMatch = bcrypt.compareSync(password, dbPassword);
+  try {
+    if (!isPasswordMatch) {
+      res.status(401).json({ message: "Invalid user or password" });
+    } else {
+      let payload = {
+        username: req.currentUser.username,
+        avatar_url: req.currentUser.avatar_url,
+        user_id: req.currentUser.user_id,
+      };
+      const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1d" });
+      req.token = token;
+      next();
+    }
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function checkPayloadLogin(req, res, next) {
+  try {
+    const { usernameOrEmail, password } = req.body;
+    if (!usernameOrEmail || usernameOrEmail.length < 0 || !password) {
+      res.status(400).json({ message: "Username or email are required." });
     } else {
       next();
     }
@@ -64,9 +120,11 @@ async function hashPassword(req, res, next) {
   }
 }
 
-
 module.exports = {
   hashPassword,
   isUserAlreadyExist,
   checkPayload,
+  checkPayloadLogin,
+  isUserExist,
+  checkPassword,
 };

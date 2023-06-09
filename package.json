@@ -26,5 +26,10 @@
     "morgan": "^1.10.0",
     "sqlite3": "^5.1.6",
     "validator": "^13.9.0"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "jest": "^29.5.0",
+    "supertest": "^6.3.3"
   }
 }
