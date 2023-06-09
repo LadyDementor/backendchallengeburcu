@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const commentModel = require("../comments/comment-model");
 const restrict = require("../middleware/restricted");
+const commentMiddleware = require("./comment-model");
 
 router.get("/", async (req, res, next) => {
   try {
@@ -47,27 +48,32 @@ router.get("/posts/:post_id", async (req, res, next) => {
   }
 });
 
-router.post("/", restrict, async (req, res, next) => {
-  try {
-    const { body, posts_id } = req.body;
-    const comment = {
-      body,
-      user_id: req.decodedToken.user_id,
-      posts_id,
-    };
-    const newCommentId = await commentModel.createComment(comment);
-    if (newCommentId) {
-      res.json({ comment_id: newCommentId });
-      next();
-    } else {
-      res
-        .status(404)
-        .json({ message: "Yorum oluşturulurken bir hata oluştu." });
+router.post(
+  "/",
+  restrict,
+
+  async (req, res, next) => {
+    try {
+      const { body, posts_id } = req.body;
+      const comment = {
+        body,
+        user_id: req.decodedToken.user_id,
+        posts_id,
+      };
+      const newCommentId = await commentModel.createComment(comment);
+      if (newCommentId) {
+        res.json({ comment_id: newCommentId });
+        next();
+      } else {
+        res
+          .status(404)
+          .json({ message: "Yorum oluşturulurken bir hata oluştu." });
+      }
+    } catch (error) {
+      next(error);
     }
-  } catch (error) {
-    next(error);
   }
-});
+);
 
 router.put("/:id", restrict, async (req, res, next) => {
   try {

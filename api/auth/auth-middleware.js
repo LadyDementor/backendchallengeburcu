@@ -69,6 +69,7 @@ async function checkPassword(req, res, next) {
   }
 }
 
+//loginde kullanılıyor
 async function checkPayloadLogin(req, res, next) {
   try {
     const { usernameOrEmail, password } = req.body;
@@ -81,7 +82,7 @@ async function checkPayloadLogin(req, res, next) {
     next(error);
   }
 }
-
+//registerda kullanılıyor
 async function isUserAlreadyExist(req, res, next) {
   try {
     const { username, email } = req.body;

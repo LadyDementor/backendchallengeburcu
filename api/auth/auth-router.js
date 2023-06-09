@@ -7,7 +7,7 @@ const restricted = require("../middleware/restricted");
 router.post(
   "/register",
   mw.checkPayload,
-  mw.isUserAlreadyExist,
+   mw.isUserAlreadyExist,
   mw.hashPassword,
   async (req, res, next) => {
     try {
